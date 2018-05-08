@@ -11,7 +11,7 @@ import java.io.*;
 /**
  * Parses CIPIC CSV Files.
  */
-class CSVCipic
+public class CSVCipic
 {
     private String subjectName;
     private BufferedReader bufferedReader;
@@ -20,8 +20,12 @@ class CSVCipic
     CSVCipic(String name)
     {
         subjectName = name;
-        cipicDirectory = System.getenv("CIPIC");
-
+        if((cipicDirectory = System.getenv("CIPIC") + "/csv/") == null)
+        {
+            System.out.println("CIPIC environment available.\n +" +
+                                       "please set the variable to the location of database");
+        }
+    }
 
     /**
      * Reads the hrir_l values from the respective CSV and stores in a Rank 3 INDArray
@@ -29,7 +33,7 @@ class CSVCipic
      */
     public INDArray readHrir_l()
     {
-        String fileName = cipicDirectory + "/" + subjectName + "/" + "hrir_l.csv";
+        String fileName = cipicDirectory + "subject_" + String.format("%03d", Integer.valueOf(subjectName)) + "/" + "hrir_l.csv";
         openReader(fileName);
 
         INDArray hrir_l = read25x50x200();
@@ -46,7 +50,7 @@ class CSVCipic
     public INDArray readHrir_r()
     {
 
-        String fileName = cipicDirectory + "/" + subjectName + "/" + "hrir_r.csv";
+        String fileName = cipicDirectory + "subject_" + String.format("%03d", Integer.valueOf(subjectName)) + "/" + "hrir_r.csv";
         openReader(fileName);
 
         INDArray hrir_r = read25x50x200();
@@ -62,7 +66,7 @@ class CSVCipic
      */
     public INDArray readITD()
     {
-        String fileName = cipicDirectory + "/" + subjectName + "/" + "itd.csv";
+        String fileName = cipicDirectory + "subject_" + String.format("%03d", Integer.valueOf(subjectName)) + "/" + "itd.csv";
         openReader(fileName);
         INDArray itdArray = read25x50();
         closeReader();
@@ -76,7 +80,7 @@ class CSVCipic
      */
     public INDArray readOnL()
     {
-        String fileName = cipicDirectory + "/" + subjectName + "/" + "onL.csv";
+        String fileName = cipicDirectory + "subject_"  + String.format("%03d", Integer.valueOf(subjectName)) + "/" + "on_l.csv";
         openReader(fileName);
         INDArray OnL = read25x50();
         closeReader();
@@ -89,7 +93,7 @@ class CSVCipic
      */
     public INDArray readOnR()
     {
-        String fileName = cipicDirectory + "/" + subjectName + "/" + "onR.csv";
+        String fileName = cipicDirectory + "subject_" + String.format("%03d", Integer.valueOf(subjectName)) + "/" + "on_r.csv";
         openReader(fileName);
         INDArray OnR = read25x50();
         closeReader();
@@ -102,7 +106,7 @@ class CSVCipic
     private INDArray read25x50x200()
     {
         Nd4j.setDataType(DataBuffer.Type.DOUBLE);
-        INDArray hrir_l = Nd4j.create(25, 50, 200);
+        INDArray outputArray = Nd4j.create(25, 50, 200);
         INDArray tempRow = Nd4j.create(50);
         DoubleBuffer buffer = new DoubleBuffer(50);
         String line = "";
@@ -133,8 +137,8 @@ class CSVCipic
                         tempRow = Nd4j.create(buffer);
 
                         // Grab the data at this row for all the columns on that given channel
-                        // Assign that our new read in data.
-                        hrir_l.get(NDArrayIndex.point(row), NDArrayIndex.all(), NDArrayIndex.point(channel)).assign(tempRow);
+                        // Assign that to our new read in data.
+                        outputArray.get(NDArrayIndex.point(row), NDArrayIndex.all(), NDArrayIndex.point(channel)).assign(tempRow);
 
                         buffer.flush();
 
@@ -155,7 +159,7 @@ class CSVCipic
             e.printStackTrace();
         }
 
-        return hrir_l;
+        return outputArray;
     }
 
     /*
@@ -164,7 +168,7 @@ class CSVCipic
     private INDArray read25x50()
     {
         Nd4j.setDataType(DataBuffer.Type.DOUBLE);
-        INDArray itdArray = Nd4j.create(25, 50);
+        INDArray outputArray = Nd4j.create(25, 50);
         INDArray tempRow = Nd4j.create(50);
         DoubleBuffer buffer = new DoubleBuffer(50);
         int row = 0, column = 0;
@@ -173,15 +177,15 @@ class CSVCipic
             String line = "";
             while((line = bufferedReader.readLine()) != null)
             {
-                String[] itds = line.split(",");
-                for (String delayValue: itds)
+                String[] values = line.split(",");
+                for (String delayValue: values)
                 {
                     if (column == 49)
                     {
                         buffer.put(column, Double.valueOf(delayValue));
                         tempRow = Nd4j.create(buffer);
 
-                        itdArray.get(NDArrayIndex.point(row), NDArrayIndex.all()).assign(tempRow);
+                        outputArray.get(NDArrayIndex.point(row), NDArrayIndex.all()).assign(tempRow);
                         buffer.flush();
 
                         column = 0;
@@ -199,7 +203,7 @@ class CSVCipic
         {
             e.printStackTrace();
         }
-        return itdArray;
+        return outputArray;
     }
 
     /*
@@ -218,7 +222,7 @@ class CSVCipic
     }
 
     /*
-        Opens the reader, gets rid of some of the clutter with multiple try catches.
+        Gets rid of some of the clutter with multiple try catches.
      */
     private void openReader(String fileName)
     {

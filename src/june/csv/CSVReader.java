@@ -1,8 +1,7 @@
 package june.csv;
 
 /**
- * As a general way of organizing different CSVReaders for different types of HRTF Databases, I propose we group them
- * in this class. We can make static calls to the type of CSV reader we want with respect to the HRTF Database Type.
+ * As a general way of organizing different CSVReaders for different types of HRTF Databases.
  */
 public class CSVReader
 {

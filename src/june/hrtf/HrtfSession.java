@@ -4,6 +4,9 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
+/**
+ * Example class for using the wrapper.
+ */
 public class HrtfSession
 {
 	// User interacts with these
@@ -27,7 +30,7 @@ public class HrtfSession
 	 */
 	public HrtfSession(HrtfSubject subject, double azimuth, double elevation)
 	{
-		hrir_l = Nd4j.create(1,200);
+		hrir_l = Nd4j.create(1, 200);
 		hrir_r = Nd4j.create(1, 200);
 
 		this.subject = subject;

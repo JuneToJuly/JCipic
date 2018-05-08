@@ -69,7 +69,7 @@ public class CipicSubject implements HrtfSubject
     }
 
     /**
-     * Gets the ide.
+     * Gets the ITD.
      * @return INDArray itd object
      */
     @Override
